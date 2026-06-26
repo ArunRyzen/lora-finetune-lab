@@ -11,6 +11,17 @@ A Colab-ready QLoRA notebook, CPU-testable data/prompt/eval code, and the analys
 
 ---
 
+## ⚡ Quick Start
+
+```bash
+git clone https://github.com/Arunops700/lora-finetune-lab.git && cd lora-finetune-lab
+uv sync --extra dev          # CPU-only — no GPU or API keys needed
+uv run lora eval             # compare base vs fine-tuned vs RAG
+```
+*CPU-only.* Actual training runs on a free Colab T4 — open `notebooks/qlora_finetune.ipynb`.
+
+---
+
 ## Problem
 
 Fine-tuning is the flashy answer and usually the *wrong* first move. Teams reach for it to add
