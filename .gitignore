@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# uv / venv
+.venv/
+venv/
+
+# Training artifacts
+outputs/
+*.safetensors
+*.bin
+wandb/
+
+# Data (keep examples; ignore large local datasets)
+data/*.jsonl
+!data/sample.jsonl
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
