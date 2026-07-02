@@ -26,21 +26,28 @@ def run_training(config: TrainingConfig, train_texts: list[str]) -> str:
             "Training requires the GPU stack. Use the Colab notebook or `pip install '.[train]'`."
         ) from exc
 
+    # Step 1 — the "Q" in QLoRA: describe HOW to compress the frozen base model to 4-bit
+    # (nf4 = a 4-bit format designed for neural-net weights; double quant squeezes a bit more).
     quant = BitsAndBytesConfig(
         load_in_4bit=config.load_in_4bit,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.bfloat16,
         bnb_4bit_use_double_quant=True,
     )
+    # The tokenizer turns text into token IDs. Some models ship without a padding token
+    # (used to make batch rows the same length), so we reuse the end-of-sequence token.
     tokenizer = AutoTokenizer.from_pretrained(config.base_model)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    # Download the base model, compressed to 4-bit as configured above; "auto" puts it on GPU.
     model = AutoModelForCausalLM.from_pretrained(
         config.base_model, quantization_config=quant, device_map="auto"
     )
     model = prepare_model_for_kbit_training(model)
 
+    # Step 2 — LoRA: describe the tiny trainable adapters to bolt onto the frozen model.
+    # Only these adapters get gradient updates; the billions of base weights never change.
     peft_config = LoraConfig(
         r=config.lora_r,
         lora_alpha=config.lora_alpha,
@@ -50,6 +57,8 @@ def run_training(config: TrainingConfig, train_texts: list[str]) -> str:
         task_type="CAUSAL_LM",
     )
 
+    # Step 3 — supervised fine-tuning (SFT): show the model our formatted examples and let the
+    # trainer handle batching, gradient accumulation, and the optimization loop.
     dataset = Dataset.from_dict({"text": train_texts})
     sft_config = SFTConfig(
         output_dir=config.output_dir,
@@ -70,5 +79,6 @@ def run_training(config: TrainingConfig, train_texts: list[str]) -> str:
         dataset_text_field="text",
     )
     trainer.train()
+    # Save ONLY the adapter (a few MB), not a full copy of the base model.
     trainer.save_model(config.output_dir)
     return config.output_dir

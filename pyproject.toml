@@ -5,7 +5,7 @@ description = "QLoRA fine-tuning lab: Colab notebook + CPU-testable data/prompt/
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-authors = [{ name = "Arunops700" }]
+authors = [{ name = "ArunRyzen" }]
 # Core deps are intentionally light (no torch): the dataset/prompt/eval code is CPU-testable and
 # runs in CI. The heavy training stack lives in the optional `train` extra and on Colab.
 dependencies = [
@@ -27,6 +27,11 @@ train = [
     "datasets>=2.20",
     "accelerate>=0.33",
     "bitsandbytes>=0.43",
+]
+# Optional: adds a Gemini API model as one more comparison point in `lora eval`.
+# The repo works fully offline without it — see src/lora_finetune_lab/gemini.py.
+gemini = [
+    "google-genai>=1.0",
 ]
 dev = [
     "ruff>=0.6",
