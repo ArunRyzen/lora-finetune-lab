@@ -40,7 +40,9 @@ admits it didn't.
 
 | Piece | Runs where | Tested? |
 |-------|-----------|:-------:|
-| `notebooks/qlora_finetune.ipynb` | Colab/Kaggle **GPU** | manual |
+| `notebooks/qlora_finetune.ipynb` — classic PEFT/TRL stack, 0.5B model | Colab/Kaggle **GPU** | manual |
+| `notebooks/unsloth_finetune.ipynb` — **Unsloth** (~2× faster, less memory), Llama 3.2 **3B** | Colab/Kaggle **GPU** | manual |
+| [`docs/free-gpu-guide.md`](docs/free-gpu-guide.md) — Colab vs Kaggle: getting a free T4 | — | — |
 | Data: build / split / **synthetic generation** (`dataset.py`) | CPU | ✅ |
 | Prompt formatting (`prompts.py`) | CPU | ✅ |
 | Eval: base vs tuned vs RAG (`evaluation.py`) | CPU | ✅ |
@@ -75,8 +77,11 @@ fine-tuned         accuracy=1.00   ← learned the skill
 rag baseline       accuracy=0.00   ← knowledge tool can't teach a skill
 ```
 
-**Train on Colab:** open [`notebooks/qlora_finetune.ipynb`](notebooks/qlora_finetune.ipynb), set the
-runtime to **T4 GPU**, and run — it generates data, trains the adapter, and evaluates base vs tuned.
+**Train on a free GPU:** open [`notebooks/qlora_finetune.ipynb`](notebooks/qlora_finetune.ipynb)
+(classic stack, 0.5B — start here) or [`notebooks/unsloth_finetune.ipynb`](notebooks/unsloth_finetune.ipynb)
+(Unsloth, 3B — do this second) on Colab or Kaggle with a **T4 GPU** and run top to bottom — each
+generates data, trains the adapter, and evaluates base vs tuned. Platform setup, quotas, and
+saving your results: [`docs/free-gpu-guide.md`](docs/free-gpu-guide.md).
 
 **Optional — a live API comparison point:** with `uv sync --extra gemini` and `GEMINI_API_KEY`
 set, `lora eval` adds `gemini-2.5-flash` as a fourth contender, answering "would a strong hosted
@@ -118,6 +123,7 @@ lint + types + tests.
 ## Learn more
 - [`docs/when-to-finetune.md`](docs/when-to-finetune.md) — **the decision framework**
 - [`docs/code-walkthrough.md`](docs/code-walkthrough.md) — **beginner's file-by-file tour of the code**
+- [`docs/free-gpu-guide.md`](docs/free-gpu-guide.md) — **where to get a free training GPU (Colab vs Kaggle)**
 - [`docs/architecture.md`](docs/architecture.md) · [`docs/interview-questions.md`](docs/interview-questions.md) · [`docs/lessons-learned.md`](docs/lessons-learned.md)
 
 ## License
