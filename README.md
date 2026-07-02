@@ -14,11 +14,15 @@ A Colab-ready QLoRA notebook, CPU-testable data/prompt/eval code, and the analys
 ## ⚡ Quick Start
 
 ```bash
-git clone https://github.com/Arunops700/lora-finetune-lab.git && cd lora-finetune-lab
+git clone https://github.com/ArunRyzen/lora-finetune-lab.git && cd lora-finetune-lab
 uv sync --extra dev          # CPU-only — no GPU or API keys needed
 uv run lora eval             # compare base vs fine-tuned vs RAG
 ```
-*CPU-only.* Actual training runs on a free Colab T4 — open `notebooks/qlora_finetune.ipynb`.
+*CPU-only, no API keys needed.* Actual training runs on a free Colab T4 — open `notebooks/qlora_finetune.ipynb`.
+
+> **New to fine-tuning or to this codebase?** Start with
+> [`docs/code-walkthrough.md`](docs/code-walkthrough.md) — a plain-English, file-by-file tour with
+> a reading order and a "where to find X" table.
 
 ---
 
@@ -42,6 +46,7 @@ admits it didn't.
 | Eval: base vs tuned vs RAG (`evaluation.py`) | CPU | ✅ |
 | Training step (`train.py`, QLoRA via PEFT/TRL) | GPU (`[train]` extra) | import-guarded |
 | Config-as-code (`config.py`) | CPU | ✅ |
+| Optional Gemini eval contender (`gemini.py`) | CPU + `GEMINI_API_KEY` (`[gemini]` extra) | ✅ (mocked) |
 
 The heavy training stack (`torch`, `transformers`, `peft`, `trl`, `bitsandbytes`) is an **optional
 extra**, so CI and local dev stay light; everything *around* training is plain, tested CPU Python.
@@ -73,6 +78,11 @@ rag baseline       accuracy=0.00   ← knowledge tool can't teach a skill
 **Train on Colab:** open [`notebooks/qlora_finetune.ipynb`](notebooks/qlora_finetune.ipynb), set the
 runtime to **T4 GPU**, and run — it generates data, trains the adapter, and evaluates base vs tuned.
 
+**Optional — a live API comparison point:** with `uv sync --extra gemini` and `GEMINI_API_KEY`
+set, `lora eval` adds `gemini-2.5-flash` as a fourth contender, answering "would a strong hosted
+model, just prompted, already solve this?" (rung 1 of the decision ladder). Entirely opt-in — the
+repo needs **no API key** otherwise; training happens on Colab, not via an API.
+
 ## Tech stack
 
 `Python 3.12` · `PEFT` · `TRL` · `transformers` · `bitsandbytes` (GPU) · `Pydantic v2` · `Typer` ·
@@ -95,18 +105,20 @@ run_training(TrainingConfig(epochs=2), [format_text(e) for e in train])
 ```bash
 uv run ruff check . && uv run mypy . && uv run pytest
 ```
-15 tests, **CPU-only** — data, prompts, synthetic generation, splitting, and the base-vs-tuned eval
-all run with no GPU and no network. CI gates lint + types + tests.
+All tests are **CPU-only and offline** — data, prompts, synthetic generation, splitting, the
+base-vs-tuned eval, and the Gemini adapter (SDK mocked) run with no GPU and no network. CI gates
+lint + types + tests.
 
 ## Future improvements
 - DPO / preference tuning after SFT.
 - A real-data example (not just synthetic) with a held-out benchmark.
 - Adapter merging + quantized serving (vLLM) notes.
-- Hook the eval into [`llm-eval-kit`](https://github.com/Arunops700/llm-eval-kit)'s gate.
+- Hook the eval into [`llm-eval-kit`](https://github.com/ArunRyzen/llm-eval-kit)'s gate.
 
 ## Learn more
 - [`docs/when-to-finetune.md`](docs/when-to-finetune.md) — **the decision framework**
+- [`docs/code-walkthrough.md`](docs/code-walkthrough.md) — **beginner's file-by-file tour of the code**
 - [`docs/architecture.md`](docs/architecture.md) · [`docs/interview-questions.md`](docs/interview-questions.md) · [`docs/lessons-learned.md`](docs/lessons-learned.md)
 
 ## License
-[MIT](LICENSE) · Part of my [AI_Engineer](https://github.com/Arunops700/AI_Engineer) portfolio (Milestone 5).
+[MIT](LICENSE) · Part of my [AI_Engineer](https://github.com/ArunRyzen/AI_Engineer) portfolio (Milestone 5).
