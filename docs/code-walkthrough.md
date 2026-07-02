@@ -201,11 +201,21 @@ already do this?"* If a hosted model aces your task with zero training, promptin
 the cheaper answer (rung 1 of the ladder in `when-to-finetune.md`). Without a key, nothing
 changes — the repo stays 100% offline.
 
-### `notebooks/qlora_finetune.ipynb` — everything, end to end
+### `notebooks/` — everything, end to end (two flavours)
 
-The Colab notebook glues it all together on a real model: install → generate data with
-`dataset.py` → format with `prompts.py` → train with `train.py` → score base vs tuned with
-`evaluation.accuracy`. Each stage has its own markdown explainer in the notebook itself.
+Both notebooks glue it all together on a real free GPU (Colab or Kaggle — see
+[`free-gpu-guide.md`](free-gpu-guide.md)): install → generate data with `dataset.py` → format
+with `prompts.py` → train → score base vs tuned with `evaluation.accuracy`. Each stage has its
+own markdown explainer inside the notebook.
+
+- **`qlora_finetune.ipynb` (start here)** — the classic Hugging Face stack (`peft`/`trl`/
+  `bitsandbytes`) on a 0.5B model, via this repo's own `train.py`. Best for *learning the
+  mechanics* — this is the stack interview questions are about.
+- **`unsloth_finetune.ipynb` (do this second)** — the same lesson powered by
+  [Unsloth](https://unsloth.ai), the popular optimized trainer (~2× faster, far less GPU
+  memory). The savings let it fine-tune a **6× bigger model (Llama 3.2 3B)** on the same free
+  T4. It also grades the model *before and after* training on the same object — safe because
+  fresh LoRA adapters start as zeros, so before training the model behaves exactly like the base.
 
 ### `tests/` — proof it works, offline
 
@@ -231,7 +241,9 @@ tested offline.
 | How heavy/optional deps are import-guarded | `try/except ImportError` in [`train.py`](../src/lora_finetune_lab/train.py) and [`gemini.py`](../src/lora_finetune_lab/gemini.py) |
 | The optional Gemini comparison | [`gemini.py`](../src/lora_finetune_lab/gemini.py) + the `GEMINI_API_KEY` block in [`cli.py`](../src/lora_finetune_lab/cli.py) |
 | Whether to fine-tune at all | [`when-to-finetune.md`](when-to-finetune.md) |
-| Real-GPU training, end to end | [`notebooks/qlora_finetune.ipynb`](../notebooks/qlora_finetune.ipynb) |
+| Real-GPU training, end to end (classic stack) | [`notebooks/qlora_finetune.ipynb`](../notebooks/qlora_finetune.ipynb) |
+| Real-GPU training with Unsloth (bigger model, faster) | [`notebooks/unsloth_finetune.ipynb`](../notebooks/unsloth_finetune.ipynb) |
+| Where to get a free GPU (Colab vs Kaggle, step by step) | [`free-gpu-guide.md`](free-gpu-guide.md) |
 
 ## The takeaway to carry with you
 
