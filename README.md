@@ -83,6 +83,10 @@ rag baseline       accuracy=0.00   ← knowledge tool can't teach a skill
 generates data, trains the adapter, and evaluates base vs tuned. Platform setup, quotas, and
 saving your results: [`docs/free-gpu-guide.md`](docs/free-gpu-guide.md).
 
+**Peek behind the curtain:** set `LLM_DEBUG=1` to watch every prompt/reply `lora eval` exchanges
+with each contender (offline fakes and Gemini alike) on stderr — in PowerShell:
+`$env:LLM_DEBUG = "1"; uv run lora eval`.
+
 **Optional — a live API comparison point:** with `uv sync --extra gemini` and `GEMINI_API_KEY`
 set, `lora eval` adds `gemini-2.5-flash` as a fourth contender, answering "would a strong hosted
 model, just prompted, already solve this?" (rung 1 of the decision ladder). Entirely opt-in — the

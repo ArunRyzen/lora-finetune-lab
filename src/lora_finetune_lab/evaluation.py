@@ -17,6 +17,7 @@ import re
 from typing import Protocol
 
 from lora_finetune_lab.dataset import InstructionExample
+from lora_finetune_lab.debuglog import log_block
 from lora_finetune_lab.prompts import format_text
 
 
@@ -80,6 +81,9 @@ class ConstantModel:
         self._reply = reply
 
     def generate(self, prompt: str) -> str:
+        # LLM_DEBUG=1 shows the exact prompt/reply traffic (see debuglog.py). Silent otherwise.
+        log_block("AI REQUEST (offline constant model)", prompt=prompt)
+        log_block("AI RESPONSE (offline constant model)", reply=self._reply)
         return self._reply
 
 
@@ -91,6 +95,13 @@ class RuleModel:
     """
 
     def generate(self, prompt: str) -> str:
+        # LLM_DEBUG=1 shows the exact prompt/reply traffic (see debuglog.py). Silent otherwise.
+        log_block("AI REQUEST (offline rule model)", prompt=prompt)
+        reply = self._solve(prompt)
+        log_block("AI RESPONSE (offline rule model)", reply=reply)
+        return reply
+
+    def _solve(self, prompt: str) -> str:
         # First, pull the user's request out of the chat-formatted prompt (see _user_turn).
         user = self._user_turn(prompt)
         # Task 1: "What is 12 + 34?" — capture the two numbers and add them.
