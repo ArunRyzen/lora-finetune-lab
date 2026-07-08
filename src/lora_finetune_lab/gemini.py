@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 
+from lora_finetune_lab.debuglog import log_block
 from lora_finetune_lab.errors import GeminiDependencyError
 
 # A fast, cheap hosted model — good enough to answer "would prompting alone solve this?".
@@ -46,6 +47,11 @@ class GeminiModel:
 
     def generate(self, prompt: str) -> str:
         """Send the prompt to Gemini and return its text reply (matches the Model protocol)."""
+        # LLM_DEBUG=1 shows the exact prompt/reply traffic (see debuglog.py). The API key is
+        # deliberately never logged — only the prompt and the reply.
+        log_block(f"AI REQUEST (gemini/{self._model})", prompt=prompt)
         response = self._client.models.generate_content(model=self._model, contents=prompt)
         # The SDK returns None for empty/blocked responses; the eval expects a plain string.
-        return response.text or ""
+        reply = response.text or ""
+        log_block(f"AI RESPONSE (gemini/{self._model})", reply=reply)
+        return reply

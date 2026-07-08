@@ -240,6 +240,7 @@ tested offline.
 | The actual QLoRA training code | `run_training` in [`train.py`](../src/lora_finetune_lab/train.py) |
 | How heavy/optional deps are import-guarded | `try/except ImportError` in [`train.py`](../src/lora_finetune_lab/train.py) and [`gemini.py`](../src/lora_finetune_lab/gemini.py) |
 | The optional Gemini comparison | [`gemini.py`](../src/lora_finetune_lab/gemini.py) + the `GEMINI_API_KEY` block in [`cli.py`](../src/lora_finetune_lab/cli.py) |
+| The exact prompts/replies during `lora eval` (set `LLM_DEBUG=1`) | [`debuglog.py`](../src/lora_finetune_lab/debuglog.py) + the `generate` methods in [`evaluation.py`](../src/lora_finetune_lab/evaluation.py) and [`gemini.py`](../src/lora_finetune_lab/gemini.py) |
 | Whether to fine-tune at all | [`when-to-finetune.md`](when-to-finetune.md) |
 | Real-GPU training, end to end (classic stack) | [`notebooks/qlora_finetune.ipynb`](../notebooks/qlora_finetune.ipynb) |
 | Real-GPU training with Unsloth (bigger model, faster) | [`notebooks/unsloth_finetune.ipynb`](../notebooks/unsloth_finetune.ipynb) |
