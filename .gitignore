@@ -9,6 +9,9 @@ dist/
 .venv/
 venv/
 
+# Local config / secrets (copy .env.example to .env; never commit the copy)
+.env
+
 # Training artifacts
 outputs/
 *.safetensors

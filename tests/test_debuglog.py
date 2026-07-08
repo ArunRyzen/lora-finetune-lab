@@ -1,6 +1,13 @@
-"""LLM_DEBUG logging: silent by default, prompt/reply blocks on stderr when enabled."""
+"""LLM_DEBUG logging: silent by default, prompt/reply blocks on stderr when enabled.
+
+Note on hermeticity: an autouse fixture in conftest.py pins the real env var to "0" for every
+test. Tests below that need the env var truly UNSET (to exercise the `.env` fallback) delenv it
+AND chdir into a temp directory, so a developer's real `.env` at the repo root can't interfere.
+"""
 
 from __future__ import annotations
+
+from pathlib import Path
 
 import pytest
 
@@ -9,8 +16,10 @@ from lora_finetune_lab.debuglog import debug_enabled, log_block
 from lora_finetune_lab.evaluation import ConstantModel, RuleModel, accuracy
 
 
-def test_debug_disabled_when_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_debug_disabled_when_unset(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)  # empty dir: no .env fallback to consult
     monkeypatch.delenv("LLM_DEBUG", raising=False)
+    debug_enabled.cache_clear()
     assert debug_enabled() is False
 
 
@@ -26,10 +35,43 @@ def test_debug_enabled_for_truthy_values(monkeypatch: pytest.MonkeyPatch, value:
     assert debug_enabled() is True
 
 
-def test_log_block_silent_when_disabled(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-8-sig"])  # -sig = Windows editors' BOM
+def test_dotenv_file_enables_debug(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, encoding: str
 ) -> None:
+    """With the env var unset, `LLM_DEBUG=1` in ./.env switches debugging on."""
+    (tmp_path / ".env").write_text("LLM_DEBUG=1\n", encoding=encoding)
+    monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("LLM_DEBUG", raising=False)
+    debug_enabled.cache_clear()
+    assert debug_enabled() is True
+
+
+def test_env_var_beats_dotenv_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A real env var — even an explicit "0" — outranks whatever the .env file says."""
+    (tmp_path / ".env").write_text("LLM_DEBUG=1\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("LLM_DEBUG", "0")
+    debug_enabled.cache_clear()
+    assert debug_enabled() is False
+
+
+def test_debug_disabled_when_no_env_var_and_no_dotenv(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Neither the env var nor a .env file present → debugging stays off."""
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("LLM_DEBUG", raising=False)
+    debug_enabled.cache_clear()
+    assert debug_enabled() is False
+
+
+def test_log_block_silent_when_disabled(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("LLM_DEBUG", raising=False)
+    debug_enabled.cache_clear()
     log_block("AI REQUEST (offline rule model)", prompt="What is 1 + 1?")
     captured = capsys.readouterr()
     assert captured.out == ""
@@ -58,9 +100,11 @@ def test_log_block_truncates_long_fields(
 
 
 def test_eval_path_silent_when_debug_unset(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
+    monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("LLM_DEBUG", raising=False)
+    debug_enabled.cache_clear()
     accuracy(RuleModel(), generate_synthetic(4))
     captured = capsys.readouterr()
     assert captured.err == ""
