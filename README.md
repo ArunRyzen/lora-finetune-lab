@@ -84,8 +84,11 @@ generates data, trains the adapter, and evaluates base vs tuned. Platform setup,
 saving your results: [`docs/free-gpu-guide.md`](docs/free-gpu-guide.md).
 
 **Peek behind the curtain:** set `LLM_DEBUG=1` to watch every prompt/reply `lora eval` exchanges
-with each contender (offline fakes and Gemini alike) on stderr — in PowerShell:
-`$env:LLM_DEBUG = "1"; uv run lora eval`.
+with each contender (offline fakes and Gemini alike) on stderr. Two ways to turn it on: as an
+environment variable — in PowerShell: `$env:LLM_DEBUG = "1"; uv run lora eval` — or by putting
+`LLM_DEBUG=1` in your `.env` file (see `.env.example`). If both are present, the real
+environment variable wins, so an explicit `LLM_DEBUG=0` in your shell silences a `.env` that
+says `1`.
 
 **Optional — a live API comparison point:** with `uv sync --extra gemini` and `GEMINI_API_KEY`
 set, `lora eval` adds `gemini-2.5-flash` as a fourth contender, answering "would a strong hosted
